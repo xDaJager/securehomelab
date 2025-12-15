@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    # ...
+    environment:
+      DB_MYSQL_PASSWORD: "${NPM_DB_PASSWORD}" 
+      DB_MYSQL_USER: "${NPM_DB_USER}"
+      TZ: "${TIMEZONE}"
+    # ...
+
+  grafana:
+    image: grafana/grafana
+    # ...
+    environment:
+      # Pareil ici :
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD}"
+    # ...
