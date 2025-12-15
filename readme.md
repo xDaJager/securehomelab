@@ -38,4 +38,5 @@ Ce projet utilise `docker-compose` pour un déploiement unifié.
 1. Cloner le dépôt :
    ```bash
 
-   git clone [https://github.com/ton-user/secure-homelab.git](https://github.com/ton-user/secure-homelab.git)
+   git clone https://github.com/xDaJager/securehomelab.git
+
