@@ -1,40 +1,41 @@
-# ??? Secure & Monitored Homelab Infrastructure
+# ğŸ›¡ï¸ Secure & Monitored Homelab Infrastructure
 
-Ce projet documente la mise en place d'une infrastructure de homelab auto-hébergée, robuste et sécurisée. L'objectif était de déployer des services conteneurisés tout en garantissant une haute sécurité (IPS/IDS) et une observabilité complète (Monitoring/Alerting).
+Ce projet documente la mise en place d'une infrastructure de homelab auto-hÃ©bergÃ©e, robuste et sÃ©curisÃ©e. L'objectif Ã©tait de dÃ©ployer des services conteneurisÃ©s tout en garantissant une haute sÃ©curitÃ© (IPS/IDS) et une observabilitÃ© complÃ¨te (Monitoring/Alerting).
 
-![Architecture Diagram](./architecture.png)
-*(Voir le schéma d'architecture ci-dessus)*
+![Architecture Diagram](./infra_homelab.png)
+*(Voir le schÃ©ma d'architecture ci-dessus)*
 
-## ?? Stack Technique
+## ğŸ”’ Stack Technique
 
-* **Infrastructure :** Freebox Delta (VM ARM64 / Debian)
+* **Infrastructure :** Freebox Ultra (VM ARM64 / Debian)
 * **Conteneurisation :** Docker & Docker Compose
 * **Orchestration :** Portainer
 * **Reverse Proxy & SSL :** Nginx Proxy Manager (Let's Encrypt auto-renewal)
-* **Sécurité (IPS/IDS) :** CrowdSec (avec bouncer pare-feu)
+* **SÃ©curitÃ© (IPS/IDS) :** CrowdSec (avec bouncer pare-feu)
 * **Monitoring :** Prometheus, Grafana, cAdvisor, Node Exporter
-* **Disponibilité :** Uptime Kuma
-* **Alerting :** Notifications Discord en temps réel
+* **DisponibilitÃ© :** Uptime Kuma
+* **Alerting :** Notifications Discord en temps rÃ©el
 
-## ?? Focus Sécurité
+## ğŸ“Š Focus SÃ©curitÃ©
 
-La sécurité est le cœur de cette infrastructure.
-* **CrowdSec** analyse les logs de Nginx Proxy Manager en temps réel.
-* Détection des comportements malveillants (Scans, Brute-force, User-Agents suspects).
-* **Remédiation automatique :** Bannissement IP via le pare-feu (ipset/nftables) au niveau du noyau Linux.
+La sÃ©curitÃ© est le cÅ“ur de cette infrastructure.
+* **CrowdSec** analyse les logs de Nginx Proxy Manager en temps rÃ©el.
+* DÃ©tection des comportements malveillants (Scans, Brute-force, User-Agents suspects).
+* **RemÃ©diation automatique :** Bannissement IP via le pare-feu (ipset/nftables) au niveau du noyau Linux.
 * Gestion des "IPs de confiance" pour l'administration locale.
 
-## ?? Observabilité
+## ğŸ› ï¸ ObservabilitÃ©
 
-Une stack complète de monitoring a été déployée pour surveiller la santé du système :
-* **Prometheus** collecte les métriques système (CPU, RAM, Disque) et Docker.
-* **Grafana** visualise les données via des dashboards personnalisés (y compris les métriques d'attaques CrowdSec).
-* **Uptime Kuma** surveille la disponibilité des services HTTP/TCP et alerte via Discord en cas de downtime.
+Une stack complÃ¨te de monitoring a Ã©tÃ© dÃ©ployÃ©e pour surveiller la santÃ© du systÃ¨me :
+* **Prometheus** collecte les mÃ©triques systÃ¨me (CPU, RAM, Disque) et Docker.
+* **Grafana** visualise les donnÃ©es via des dashboards personnalisÃ©s (y compris les mÃ©triques d'attaques CrowdSec).
+* **Uptime Kuma** surveille la disponibilitÃ© des services HTTP/TCP et alerte via Discord en cas de downtime.
 
-## ??? Installation
+## ğŸ§¾ Installation
 
-Ce projet utilise `docker-compose` pour un déploiement unifié.
+Ce projet utilise `docker-compose` pour un dÃ©ploiement unifiÃ©.
 
-1. Cloner le dépôt :
+1. Cloner le dÃ©pÃ´t :
    ```bash
+
    git clone [https://github.com/ton-user/secure-homelab.git](https://github.com/ton-user/secure-homelab.git)
