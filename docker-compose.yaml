@@ -1,19 +1,125 @@
 version: '3.8'
 
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+  monitoring_net:
+    driver: bridge
+
 services:
+  # --- REVERSE PROXY ---
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
-    # ...
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'   # HTTP
+      - '443:443' # HTTPS
+      - '81:81'   # Admin Web UI
     environment:
-      DB_MYSQL_PASSWORD: "${NPM_DB_PASSWORD}" 
+      DB_MYSQL_HOST: "db-npm"
+      DB_MYSQL_PORT: 3306
       DB_MYSQL_USER: "${NPM_DB_USER}"
+      DB_MYSQL_PASSWORD: "${NPM_DB_PASSWORD}"
+      DB_MYSQL_NAME: "npm"
       TZ: "${TIMEZONE}"
-    # ...
+    volumes:
+      - ./data/npm:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - db-npm
+    networks:
+      - frontend_net
+      - backend_net
+
+  # --- DATABASE (NPM) ---
+  db-npm:
+    image: 'jc21/mariadb-aria:latest'
+    container_name: db-npm
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${NPM_DB_PASSWORD}"
+      MYSQL_DATABASE: "npm"
+      MYSQL_USER: "${NPM_DB_USER}"
+      MYSQL_PASSWORD: "${NPM_DB_PASSWORD}"
+      TZ: "${TIMEZONE}"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - backend_net
+
+  # --- SECURITY (CrowdSec) ---
+  crowdsec:
+    image: crowdsecurity/crowdsec
+    container_name: crowdsec
+    restart: always
+    environment:
+      COLLECTIONS: "crowdsecurity/nginx-proxy-manager crowdsecurity/http-cve crowdsecurity/linux"
+      TZ: "${TIMEZONE}"
+    volumes:
+      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./crowdsec/db:/var/lib/crowdsec/data/
+      - ./crowdsec/config:/etc/crowdsec/
+      - ./data/npm:/var/log/npm:ro # Lecture des logs NPM
+    networks:
+      - backend_net
+      - monitoring_net
+
+  # --- MONITORING ---
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring_net
 
   grafana:
     image: grafana/grafana
-    # ...
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
     environment:
-      # Pareil ici :
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD}"
-    # ...
+      TZ: "${TIMEZONE}"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring_net
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring_net
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - '3001:3001'
+    volumes:
+      - uptime-kuma:/app/data
+    networks:
+      - monitoring_net
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  uptime-kuma:
