@@ -64,15 +64,12 @@ Ce projet utilise `docker-compose` pour un déploiement unifié et reproductible
 ```bash
 git clone [https://github.com/xDaJager/securehomelab.git](https://github.com/xDaJager/securehomelab.git)
 
-Markdown
-
 2. Accéder au dossier :
 ```bash
 cd securehomelab
 
     Configuration de l'environnement : Créez le fichier .env à partir de l'exemple et modifiez les mots de passe :
 
-Bash
 
 cp .env.example .env
 nano .env
@@ -81,8 +78,6 @@ Assurez-vous de définir des mots de passe forts pour NPM_DB_PASSWORD et GRAFANA
 
     Préparation des dossiers : Créez les répertoires nécessaires pour éviter les problèmes de permission au démarrage (notamment pour le Honeypot et Metabase) :
 
-Bash
-
 mkdir -p cowrie/var/log/cowrie
 mkdir -p cowrie/etc
 mkdir -p metabase-data
@@ -90,13 +85,10 @@ mkdir -p duplicati/config
 
     Démarrage de la stack : Lancez l'ensemble des conteneurs en mode détaché :
 
-Bash
 
 docker-compose up -d
 
     ⚠️ Correction des permissions (Crucial pour Metabase) : Une fois CrowdSec démarré, il va créer sa base de données. Il faut donner les droits de lecture à Metabase pour que le dashboard fonctionne :
-
-Bash
 
 # Autoriser la lecture de la DB CrowdSec par les autres conteneurs
 sudo chmod 644 crowdsec/db/crowdsec.db
@@ -124,3 +116,4 @@ Cowrie (Honeypot)	2222	Port SSH leurre	Ne pas exposer l'interface, c'est un piè
         Connectez la base de données : Type SQLite.
 
         Chemin du fichier : /crowdsec-db/crowdsec.db (Chemin interne au conteneur).
+
