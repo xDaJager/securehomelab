@@ -63,3 +63,64 @@ Ce projet utilise `docker-compose` pour un déploiement unifié et reproductible
 1.  Cloner le dépôt :
 ```bash
 git clone [https://github.com/xDaJager/securehomelab.git](https://github.com/xDaJager/securehomelab.git)
+
+Markdown
+
+2. Accéder au dossier :
+```bash
+cd securehomelab
+
+    Configuration de l'environnement : Créez le fichier .env à partir de l'exemple et modifiez les mots de passe :
+
+Bash
+
+cp .env.example .env
+nano .env
+
+Assurez-vous de définir des mots de passe forts pour NPM_DB_PASSWORD et GRAFANA_PASSWORD.
+
+    Préparation des dossiers : Créez les répertoires nécessaires pour éviter les problèmes de permission au démarrage (notamment pour le Honeypot et Metabase) :
+
+Bash
+
+mkdir -p cowrie/var/log/cowrie
+mkdir -p cowrie/etc
+mkdir -p metabase-data
+mkdir -p duplicati/config
+
+    Démarrage de la stack : Lancez l'ensemble des conteneurs en mode détaché :
+
+Bash
+
+docker-compose up -d
+
+    ⚠️ Correction des permissions (Crucial pour Metabase) : Une fois CrowdSec démarré, il va créer sa base de données. Il faut donner les droits de lecture à Metabase pour que le dashboard fonctionne :
+
+Bash
+
+# Autoriser la lecture de la DB CrowdSec par les autres conteneurs
+sudo chmod 644 crowdsec/db/crowdsec.db
+# Redémarrer Metabase pour qu'il prenne en compte le changement
+docker restart metabase
+
+🌐 Accès aux Services
+
+Une fois déployé, voici les ports d'accès par défaut (à configurer via Nginx Proxy Manager pour l'accès externe sécurisé) :
+Service	Port Local	URL Locale	Identifiants par défaut
+Nginx Proxy Manager	81	http://IP_LOCALE:81	admin@example.com / changeme
+Grafana	3000	http://IP_LOCALE:3000	admin / (celui du .env)
+Uptime Kuma	3001	http://IP_LOCALE:3001	(Création de compte au 1er lancement)
+Metabase (BI)	3008	http://IP_LOCALE:3008	(Setup au 1er lancement)
+Duplicati (Backup)	8200	http://IP_LOCALE:8200	(Pas de mdp par défaut)
+Cowrie (Honeypot)	2222	Port SSH leurre	Ne pas exposer l'interface, c'est un piège
+⚙️ Configuration Initiale Requise
+
+    Nginx Proxy Manager : Connectez-vous, changez les identifiants admin, et créez vos Proxy Hosts.
+
+    CrowdSec : Le bouncer est déjà configuré, mais vous pouvez gérer les décisions via : docker exec -it crowdsec cscli decisions list
+
+    Metabase :
+
+        Connectez la base de données : Type SQLite.
+
+        Chemin du fichier : /crowdsec-db/crowdsec.db (Chemin interne au conteneur).
